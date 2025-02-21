@@ -19,7 +19,7 @@ if ingredients_list:
     ingredients_string = ' '.join(ingredients_list).strip()  # Join selected fruits into a string
 
     for fruit_chosen in ingredients_list:
-        ingreddients_string += fruit_chosen + ' '
+        ingredients_string += fruit_chosen + ' '
         smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
         st.df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
     # Fixing the SQL query based on the number of columns
