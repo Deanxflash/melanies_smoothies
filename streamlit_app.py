@@ -34,18 +34,3 @@ if ingredients_list:
 
 
 
-
-
-
-
-
-
-
-
-
-
-import requests
-smoothieroot_response = requests.get("https://my.smoothieroot.com/api/fruit/watermelon")
-st.text(smoothieroot_response.json())
-# sf_df = st.dataframe(data=smoothieroot_response.json(), use_container_width=True)
-
