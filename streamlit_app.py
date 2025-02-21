@@ -1,6 +1,6 @@
 import streamlit as st
 from snowflake.snowpark.functions import col
-
+import requests
 # Streamlit UI
 st.title(" 🥤 Customize Your Smoothie! 🥤")
 st.write("Choose the fruit you want in your custom Smoothie!")
@@ -18,6 +18,10 @@ ingredients_list = st.multiselect('Choose up to 5 ingredients:', my_dataframe , 
 if ingredients_list:
     ingredients_string = ' '.join(ingredients_list).strip()  # Join selected fruits into a string
 
+    for fruit_chosen in ingredients_list:
+        ingreddients_string += fruit_chosen + ' '
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+        st.df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
     # Fixing the SQL query based on the number of columns
     my_insert_stmt = f"""
         INSERT INTO smoothies.public.orders (ingredients, name_on_order)
@@ -32,7 +36,5 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success(f' Your Smoothie is ordered, {name_on_order}!', icon="✅")
 
-import requests
-smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-# st.text(smoothiefroot_response.json())
-st.df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+
+
