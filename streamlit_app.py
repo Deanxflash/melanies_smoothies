@@ -2,52 +2,42 @@ import streamlit as st
 from snowflake.snowpark.functions import col
 import requests
 import pandas as pd
+
 # Streamlit UI
 st.title(" 🥤 Customize Your Smoothie! 🥤")
 st.write("Choose the fruit you want in your custom Smoothie!")
 
+# Input for name on order
 name_on_order = st.text_input("Name on Smoothie:")
 st.write('The name on your Smoothie will be:', name_on_order)
 
+# Snowflake Connection
 cnx = st.connection("snowflake")
 session = cnx.session()
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'),col('SEARCH_ON'))
-#st.dataframe(data=my_dataframe, use_container_width=True)
-#st.stop()
 
-pd_df=my_dataframe.to_pandas()
+# Fetch Data from Snowflake
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
+
+# Convert Snowflake DataFrame to Pandas DataFrame
+pd_df = my_dataframe.to_pandas()
+
+# Display DataFrame (Uncomment for debugging)
 # st.dataframe(pd_df)
-# st.stop()
 
+# Multiselect input for ingredients (now using Pandas DataFrame list)
+ingredients_list = st.multiselect('Choose up to 5 ingredients:', pd_df['FRUIT_NAME'].tolist(), max_selections=5)
 
-# Multiselect input for ingredients
-ingredients_list = st.multiselect('Choose up to 5 ingredients:', my_dataframe , max_selections=5)
-
+# Processing selected ingredients
 if ingredients_list:
     ingredients_string = ' '.join(ingredients_list).strip()  # Join selected fruits into a string
+    st.write("Selected Ingredients:", ingredients_string)
 
     for fruit_chosen in ingredients_list:
-        ingredients_string += fruit_chosen + ' '
-
-        # search_on=pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
-        # st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
-
-        st.subheader(fruit_chosen + ' Nutrition Information')
-        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_chosen)
-        st.df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
-    # Fixing the SQL query based on the number of columns
-    my_insert_stmt = f"""
-        INSERT INTO smoothies.public.orders (ingredients, name_on_order)
-        VALUES ('{ingredients_string}', '{name_on_order}')
-    """
-
-    # st.write(my_insert_stmt)  # Debugging output
-
-    # Button to submit order
-    time_to_insert = st.button('Submit Order')
-    if time_to_insert:
-        session.sql(my_insert_stmt).collect()
-        st.success(f' Your Smoothie is ordered, {name_on_order}!', icon="✅")
-
-
-
+        # Ensure that fruit_chosen exists in DataFrame to prevent IndexError
+        matching_rows = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON']
+        
+        if not matching_rows.empty:
+            search_on = matching_rows.iloc[0]  # Get the first matching value
+            st.write(f'The search value for {fruit_chosen} is: {search_on}')
+        else:
+            st.write(f'No search value found for {fruit_chosen}')
