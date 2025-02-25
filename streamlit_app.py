@@ -33,8 +33,9 @@ if ingredients_list:
         st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
 
         st.subheader(fruit_chosen + ' Nutrition Information')
-        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_chosen)
-        st.df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+        fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + fruit_chosen)
+        # smoothiefroot_ = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_chosen)
+        st.df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
     # Fixing the SQL query based on the number of columns
     my_insert_stmt = f"""
         INSERT INTO smoothies.public.orders (ingredients, name_on_order)
